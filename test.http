@@ -1,0 +1,6 @@
+POST http://localhost:3500/company
+
+{
+    "name" : "a-company",
+    "location" : "C Company"
+}

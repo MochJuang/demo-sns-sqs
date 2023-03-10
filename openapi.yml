@@ -1,0 +1,159 @@
+openapi: 3.0.3
+info:
+  description: For testing openapi generator
+  title: Testing
+  version: 1.2.3
+paths:
+  /person:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenApiResponseData'
+          description: OK
+      security:
+      - bearer_token: []
+      summary: '[GET][/person] Get Person'
+    put:
+      parameters:
+      - in: header
+        name: Authorization
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenApiPersonRequest'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenApiResponseData'
+          description: OK
+      summary: '[PUT][/person] Insert Person'
+  /person/{id}:
+    delete:
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          example: XXX-XXXXX
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenApiResponseData'
+          description: OK
+      security:
+      - bearer_token: []
+      summary: '[DELETE][/person/{id}] Delete Person'
+    get:
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          example: XXX-XXXXX
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenApiResponseData'
+          description: OK
+      security:
+      - bearer_token: []
+      summary: '[GET][/person/{id}] Get by id person'
+    patch:
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          example: XXX-XXXXX
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenApiPersonRequestUpdate'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenApiResponseData'
+          description: OK
+      security:
+      - bearer_token: []
+      summary: '[PATCH][/person/{id}] Update Person'
+components:
+  schemas:
+    OpenApiPerson:
+      nullable: true
+      properties:
+        hobby:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+      type: object
+    OpenApiPersonRequest:
+      properties:
+        hobby:
+          type: string
+        name:
+          type: string
+      type: object
+    OpenApiPersonRequestUpdate:
+      properties:
+        hobby:
+          type: string
+        id:
+          example: XXX-XXXXX
+          type: string
+        name:
+          type: string
+      type: object
+    OpenApiResponseData:
+      properties:
+        count:
+          minimum: 0
+          nullable: true
+          type: integer
+        data:
+          $ref: '#/components/schemas/OpenApiPerson'
+        error:
+          type: string
+        headers:
+          additionalProperties:
+            type: string
+          type: object
+        lastEvaluatedKey: {}
+        message:
+          type: string
+        start:
+          minimum: 0
+          nullable: true
+          type: integer
+        total:
+          minimum: 0
+          nullable: true
+          type: integer
+      type: object
+  securitySchemes:
+    bearer_token:
+      bearerFormat: JWT
+      description: Access
+      scheme: bearer
+      type: http

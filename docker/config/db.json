@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "timestamp": 1661410866290,
+  "subscriptions": [{
+    "arn": "arn:aws:sns:us-east-1:123456789012:update-voucher:c01aaeda-068c-4dd2-927f-49f8c4dc5ce7",
+    "topicArn": "arn:aws:sns:us-east-1:123456789012:update-voucher",
+    "endpoint": "aws-sqs://update-voucher?amazonSQSEndpoint=http://sqs:9324&accessKey=&secretKey=",
+    "owner": "",
+    "protocol": "sqs"
+  }, {
+    "arn": "arn:aws:sns:us-east-1:123456789012:update-sku:c01aaeda-068c-4dd2-927f-49f8c4dc5ce7",
+    "topicArn": "arn:aws:sns:us-east-1:123456789012:update-sku",
+    "endpoint": "aws-sqs://update-sku?amazonSQSEndpoint=http://sqs:9324&accessKey=&secretKey=",
+    "owner": "",
+    "protocol": "sqs"
+  }, {
+    "arn": "arn:aws:sns:us-east-1:123456789012:update-cart:c01aaeda-068c-4dd2-927f-49f8c4dc5ce7",
+    "topicArn": "arn:aws:sns:us-east-1:123456789012:update-cart",
+    "endpoint": "aws-sqs://update-cart?amazonSQSEndpoint=http://sqs:9324&accessKey=&secretKey=",
+    "owner": "",
+    "protocol": "sqs"
+  }],
+  "topics": [{
+    "arn": "arn:aws:sns:us-east-1:123456789012:update-cart",
+    "name": "update-cart"
+  },{
+    "arn": "arn:aws:sns:us-east-1:123456789012:update-voucher",
+    "name": "update-voucher"
+  },{
+    "arn": "arn:aws:sns:us-east-1:123456789012:update-sku",
+    "name": "update-sku"
+  }]
+}
