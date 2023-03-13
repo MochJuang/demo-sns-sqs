@@ -1,13 +1,6 @@
 version: '2'
 services:
-  sns:
-    image: s12v/sns
-    ports:
-      - "9911:9911"
-    volumes:
-      - ./config/db.json:/etc/sns/db.json
-    depends_on:
-      - sqs
+
   sqs:
     image: s12v/elasticmq
     ports:
