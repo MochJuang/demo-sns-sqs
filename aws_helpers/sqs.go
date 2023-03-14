@@ -13,9 +13,10 @@ import (
 type SqsHelper struct {
 	SqsClient *sqs.Client
 	Cfg       aws.Config
+	QueueName string
 }
 
-func (that *SqsHelper) Connect() (err error) {
+func (that *SqsHelper) Connect(queueName string) (err error) {
 
 	that.Cfg, err = config.LoadDefaultConfig(context.TODO(),
 		config.WithEndpointResolver(aws.EndpointResolverFunc(
@@ -29,6 +30,7 @@ func (that *SqsHelper) Connect() (err error) {
 	}
 
 	that.SqsClient = sqs.NewFromConfig(that.Cfg)
+	that.QueueName = queueName
 
 	return
 }
@@ -48,9 +50,7 @@ func (that *SqsHelper) GetUrlQueue(queue string) (out *sqs.GetQueueUrlOutput, er
 func (that *SqsHelper) GetMessage(url string) (out *sqs.ReceiveMessageOutput, err error) {
 
 	out, err = that.SqsClient.ReceiveMessage(context.TODO(), &sqs.ReceiveMessageInput{
-		QueueUrl:            &url,
-		MaxNumberOfMessages: 1,
-		VisibilityTimeout:   60,
+		QueueUrl: &url,
 	})
 
 	if err != nil {
@@ -59,19 +59,22 @@ func (that *SqsHelper) GetMessage(url string) (out *sqs.ReceiveMessageOutput, er
 
 	return
 }
-func (that *SqsHelper) Publish(queueName, message string) (err error) {
+func (that *SqsHelper) Publish(receiverName, message string) (err error) {
 	_, err = that.SqsClient.SendMessage(context.Background(), &sqs.SendMessageInput{
-		MessageBody: aws.String(message),
-		QueueUrl:    aws.String("http://sqs:9324/queue/" + queueName),
+		MessageBody: aws.String(MessageBody{
+			ReceiverName: receiverName,
+			Body:         message,
+		}.ToJson()),
+		QueueUrl: aws.String("http://sqs:9324/queue/" + that.QueueName),
 	})
 	return
 }
 
-func (that *SqsHelper) Consumer(queueName string, callback func(json string) (_err error)) (_err error) {
+func (that *SqsHelper) Consumer(receiverName string, callback func(messageBody MessageBody) (_err error)) (_err error) {
 	var queueUrl *sqs.GetQueueUrlOutput
 	var message *sqs.ReceiveMessageOutput
 
-	queueUrl, _err = that.GetUrlQueue(queueName)
+	queueUrl, _err = that.GetUrlQueue(that.QueueName)
 
 	if _err != nil {
 		fmt.Println("Error get url queue")
@@ -87,35 +90,33 @@ func (that *SqsHelper) Consumer(queueName string, callback func(json string) (_e
 		}
 
 		if len(message.Messages) > 0 {
-
 			for _, msg := range message.Messages {
 				var body = *msg.Body
+				var messageBody MessageBody
 
-				_err = callback(body)
-
-				if _err != nil {
-					var errQueue = &ResponseErr{}
-					json.Unmarshal([]byte(_err.Error()), errQueue)
-					log.Println(errQueue.Err)
-
-					if errQueue.Code == "01" {
-						_err = that.Publish(errQueue.QueueName, errQueue.Message)
+				json.Unmarshal([]byte(body), &messageBody)
+				if messageBody.ReceiverName == receiverName {
+					_err = callback(messageBody)
+					if _err != nil {
+						var errQueue = &ResponseErr{}
+						json.Unmarshal([]byte(_err.Error()), errQueue)
+						log.Println(errQueue.Err)
+						if errQueue.Code == "01" {
+							_err = that.Publish(errQueue.QueueName, errQueue.Message)
+						}
+					}
+					dMInput := &sqs.DeleteMessageInput{
+						QueueUrl:      queueUrl.QueueUrl,
+						ReceiptHandle: msg.ReceiptHandle,
+					}
+					// var output *sqs.DeleteMessageOutput
+					_, _err = that.SqsClient.DeleteMessage(context.TODO(), dMInput)
+					if _err != nil {
+						fmt.Println("Error deleted message")
+						return
 					}
 				}
-
-				dMInput := &sqs.DeleteMessageInput{
-					QueueUrl:      queueUrl.QueueUrl,
-					ReceiptHandle: msg.ReceiptHandle,
-				}
-
-				// var output *sqs.DeleteMessageOutput
-				_, _err = that.SqsClient.DeleteMessage(context.TODO(), dMInput)
-				if _err != nil {
-					fmt.Println("Error deleted message")
-					return
-				}
 			}
-			fmt.Println("")
 		}
 	}
 }

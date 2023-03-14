@@ -12,7 +12,7 @@ func main() {
 	var err error
 	var sqsHelper aws_helpers.SqsHelper
 
-	err = sqsHelper.Connect()
+	err = sqsHelper.Connect("counter")
 	if err != nil {
 		log.Println(err.Error())
 	}
@@ -20,7 +20,7 @@ func main() {
 
 	for {
 		mess := fmt.Sprintf("{\"CounterNumber\" : %v}", counter)
-		err = sqsHelper.Publish("change-configuration-ticket-limit-queue", mess)
+		err = sqsHelper.Publish("change-configuration-ticket-limit-queue-02", mess)
 		if err != nil {
 			fmt.Println(err.Error())
 		}

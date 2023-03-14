@@ -3,6 +3,7 @@ package aws_helpers
 import (
 	"encoding/json"
 	"errors"
+	"gitlab.com/ptami_lib/util"
 )
 
 type ResponseErr struct {
@@ -10,6 +11,17 @@ type ResponseErr struct {
 	Message   string
 	Err       string
 	QueueName string
+}
+
+type MessageBody struct {
+	ReceiverName string
+	Body         string
+	MessageId    *string
+}
+
+func (m MessageBody) ToJson() (message string) {
+	message = util.StructToString(m)
+	return
 }
 
 func CreateError(code string, err string, message string, queueName string) (_err error) {
